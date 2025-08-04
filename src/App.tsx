@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { askGemini } from './api';
 import Chatbot from './Components/Chatbot';
 import Login from './Pages/Login';
 import Signup from './Pages/Signup';
