@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Chatbot from './Components/Chatbot';
+import Home from './Pages/Home';
 import Login from './Pages/Login';
 import Signup from './Pages/Signup';
 import Dashboard from './Pages/EmployeDashboard';
@@ -20,6 +21,7 @@ const App: React.FC = () => {
     <>
       <Router>
         <Routes>
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login onLogin={() => {}} />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/employedashboard" element={<Dashboard />} />
