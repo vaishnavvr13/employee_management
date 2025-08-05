@@ -45,12 +45,31 @@ const Home = () => {
               EmpowerHR
             </div>
             
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex space-x-8">
+            {/* Desktop Navigation with Routes Dropdown */}
+            <div className="hidden md:flex space-x-8 items-center">
               <a href="#features" className="hover:text-blue-400 transition-colors">Features</a>
               <a href="#about" className="hover:text-blue-400 transition-colors">About</a>
               <a href="#pricing" className="hover:text-blue-400 transition-colors">Pricing</a>
               <a href="#contact" className="hover:text-blue-400 transition-colors">Contact</a>
+              {/* Routes Dropdown */}
+              <div className="relative group">
+                <button className="px-4 py-2 border border-blue-400 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg">
+                  Menu
+                </button>
+                <div className="absolute left-0 mt-2 w-56 bg-slate-900 border border-blue-400 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-300 z-10">
+                  <ul className="py-2">
+                    <li><button className="w-full text-left px-4 py-2 hover:bg-blue-400 hover:bg-opacity-20" onClick={() => navigate('/login')}>Login</button></li>
+                    <li><button className="w-full text-left px-4 py-2 hover:bg-blue-400 hover:bg-opacity-20" onClick={() => navigate('/signup')}>Signup</button></li>
+                    <li><button className="w-full text-left px-4 py-2 hover:bg-blue-400 hover:bg-opacity-20" onClick={() => navigate('/employedashboard')}>Employee Dashboard</button></li>
+                    <li><button className="w-full text-left px-4 py-2 hover:bg-blue-400 hover:bg-opacity-20" onClick={() => navigate('/announcements')}>Announcements</button></li>
+                    <li><button className="w-full text-left px-4 py-2 hover:bg-blue-400 hover:bg-opacity-20" onClick={() => navigate('/leave')}>Leave History</button></li>
+                    <li><button className="w-full text-left px-4 py-2 hover:bg-blue-400 hover:bg-opacity-20" onClick={() => navigate('/attendance')}>Attendance</button></li>
+                    <li><button className="w-full text-left px-4 py-2 hover:bg-blue-400 hover:bg-opacity-20" onClick={() => navigate('/dashboard')}>Admin Dashboard</button></li>
+                    <li><button className="w-full text-left px-4 py-2 hover:bg-blue-400 hover:bg-opacity-20" onClick={() => navigate('/profile')}>Profile</button></li>
+                    <li><button className="w-full text-left px-4 py-2 hover:bg-blue-400 hover:bg-opacity-20" onClick={() => navigate('/login')}>Default (404)</button></li>
+                  </ul>
+                </div>
+              </div>
             </div>
 
             {/* Auth Buttons */}
