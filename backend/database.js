@@ -25,20 +25,38 @@ const testConnection = async () => {
 
 const initDatabase = async () => {
   try {
+    // Create users table
     await pool.execute(`
       CREATE TABLE IF NOT EXISTS users (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      name VARCHAR(100) NOT NULL,
-      email VARCHAR(100) UNIQUE NOT NULL,
-      password VARCHAR(255) NOT NULL,
-      role ENUM('admin', 'employee') DEFAULT 'employee',
-      position VARCHAR(100),         -- only for employees
-      salary DECIMAL(10, 2),        -- only for employees
-      place VARCHAR(100),            -- only for employees
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    );
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(100) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        role ENUM('admin', 'employee') DEFAULT 'employee',
+        position VARCHAR(100),
+        salary DECIMAL(10, 2),
+        place VARCHAR(100),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      );
     `);
+
+    // Create leave_requests table
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS leave_requests (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        from_date DATE NOT NULL,
+        to_date DATE NOT NULL,
+        type VARCHAR(50) NOT NULL,
+        reason TEXT NOT NULL,
+        status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+    `);
+
     console.log('Database tables initialized successfully');
   } catch (error) {
     console.error('Error initializing database:', error);
@@ -46,4 +64,4 @@ const initDatabase = async () => {
   }
 };
 
-module.exports = { pool, initDatabase, testConnection }; 
+module.exports = { pool, initDatabase, testConnection };

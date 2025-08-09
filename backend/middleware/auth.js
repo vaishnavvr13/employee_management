@@ -11,8 +11,7 @@ const auth = async (req, res, next) => {
     }
 
     // Verify token
-    const jwtSecret = process.env.JWT_SECRET || 'default_secret_key';
-    const decoded = jwt.verify(token, jwtSecret);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
     // Get user from database
     const [rows] = await pool.execute('SELECT id, name, email FROM users WHERE id = ?', [decoded.userId]);

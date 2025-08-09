@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const router = express.Router();
 
 // GET /api/employees/profile
-router.get('/profile', auth, async (req, res) => {
+router.get('/', auth, async (req, res) => {
     try {
       const userId = req.user.id; 
   

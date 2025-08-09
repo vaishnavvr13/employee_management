@@ -7,6 +7,7 @@ const { initDatabase, testConnection } = require('./database');
 const authRoutes = require('./routes/auth');
 const employeeRoutes = require('./routes/employees');
 const profileRoutes = require('./routes/profile');
+const leaveRoutes = require('./routes/leave');
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(cors({
 app.use('/api/users', authRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/employees/profile', profileRoutes);
+app.use('/api/employees/leave', leaveRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {

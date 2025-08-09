@@ -6,16 +6,18 @@ const { pool } = require('../database');
 
 const router = express.Router();
 
-
+const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8}$/;
 
 router.post('/signup', [
   body('name', 'Name is required').not().isEmpty(),
   body('email', 'Please include a valid email').isEmail(),
-  body('password', 'Please enter a password with 6 or more characters').isLength({ min: 6 }),
-  body('role', 'Role must be either admin or employee').isIn(['admin', 'employee']) 
+  body('password')
+    .matches(strongPasswordRegex)
+    .withMessage('Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.'),
+  body('role', 'Role must be either admin or employee').isIn(['admin', 'employee'])
 ], async (req, res) => {
   try {
-    console.log('Signup request received:', req.body); 
+    console.log('Signup request received:', req.body);
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -29,10 +31,9 @@ router.post('/signup', [
       return res.status(400).json({ message: 'User already exists' });
     }
 
-console.log('error'); 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    console.log('error',hashedPassword,salt); 
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    console.log('Hashed password:', hashedPassword);
 
     const [result] = await pool.execute(
       'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
@@ -41,17 +42,15 @@ console.log('error');
 
     const [newUser] = await pool.execute('SELECT id, name, email, role FROM users WHERE id = ?', [result.insertId]);
 
-    console.log('New user created:', { id: newUser[0].id, name: newUser[0].name, role: newUser[0].role }); 
+    console.log('New user created:', { id: newUser[0].id, name: newUser[0].name, role: newUser[0].role });
 
     // Create JWT token
     const payload = {
       userId: newUser[0].id,
-      role: newUser[0].role 
+      role: newUser[0].role
     };
-    // Fallback for missing env variables
-    const jwtSecret = process.env.JWT_SECRET || 'default_secret_key';
-    const jwtExpiresIn = process.env.JWT_EXPIRES_IN || '1d';
-    const token = jwt.sign(payload, jwtSecret, { expiresIn: jwtExpiresIn });
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
 
     // Set cookie
     res.cookie('token', token, {
@@ -67,18 +66,17 @@ console.log('error');
       role: newUser[0].role
     });
   } catch (error) {
-    console.error('Signup error:', error); 
+    console.error('Signup error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
-
 
 router.post('/signin', [
   body('email', 'Please include a valid email').isEmail(),
   body('password', 'Password is required').exists()
 ], async (req, res) => {
   try {
-    console.log('Signin request received:', req.body); 
+    console.log('Signin request received:', req.body);
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -99,48 +97,44 @@ router.post('/signin', [
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    console.log('User signed in:', { id: user.id, name: user.name, role: user.role }); 
+    console.log('User signed in:', { id: user.id, name: user.name, role: user.role });
 
     const payload = {
       userId: user.id,
-      role: user.role 
+      role: user.role
     };
 
-    const jwtSecret = process.env.JWT_SECRET || 'default_secret_key';
-    const jwtExpiresIn = process.env.JWT_EXPIRES_IN || '1d';
-    const token = jwt.sign(payload, jwtSecret, { expiresIn: jwtExpiresIn });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
 
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 24 * 60 * 60 * 1000 
+      maxAge: 24 * 60 * 60 * 1000
     });
 
     res.json({
       id: user.id,
       name: user.name,
       email: user.email,
-      role: user.role 
+      role: user.role
     });
   } catch (error) {
-    console.error('Signin error:', error); 
+    console.error('Signin error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-
 router.get('/currentuser', async (req, res) => {
   try {
     const token = req.cookies?.token || req.headers.authorization?.replace('Bearer ', '');
-    
+
     if (!token) {
       return res.json({ currentUser: null });
     }
 
-    const jwtSecret = process.env.JWT_SECRET || 'default_secret_key';
-    const decoded = jwt.verify(token, jwtSecret);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const [users] = await pool.execute('SELECT id, name, email FROM users WHERE id = ?', [decoded.userId]);
-    
+
     if (users.length === 0) {
       return res.json({ currentUser: null });
     }
@@ -151,7 +145,6 @@ router.get('/currentuser', async (req, res) => {
     res.json({ currentUser: null });
   }
 });
-
 
 router.post('/signout', (req, res) => {
   res.clearCookie('token');
